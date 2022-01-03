@@ -2,6 +2,7 @@ import path from "path";
 import { Configuration, DefinePlugin } from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import TsconfigPathsPlugin from "tsconfig-paths-webpack-plugin";
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
 const webpackConfig = (): Configuration => ({
   entry: "./src/index.tsx",
@@ -28,8 +29,22 @@ const webpackConfig = (): Configuration => ({
         exclude: /build/,
       },
       {
+        test: /\.(js|ts|tsx|jsx)$/,
+        exclude: /node_modules/,
+        loader: '@linaria/webpack-loader',
+        options: {
+          sourceMap: process.env.NODE_ENV !== 'production',
+        },
+      },
+      {
         test: /\.s?css$/,
-        use: ["style-loader", "css-loader"],
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+          },
+          // "style-loader",
+          "css-loader"
+        ],
       },
     ],
   },
@@ -46,7 +61,8 @@ const webpackConfig = (): Configuration => ({
     // DefinePlugin allows you to create global constants which can be configured at compile time
     new DefinePlugin({
       "process.env": process.env.production || !process.env.development,
-    }),    
+    }),
+    new MiniCssExtractPlugin({ filename: 'styles.css' }),
   ],
 });
 
